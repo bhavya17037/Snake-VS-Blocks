@@ -1,0 +1,34 @@
+package sample;
+
+import javafx.scene.Node;
+
+public class Player {
+
+    private Node view;
+    private int velocity;
+
+    public Player(Node view) {
+        this.view = view;
+    }
+
+    public Node getView() {
+        return view;
+    }
+
+    public void moveLeft() {
+        view.setTranslateX(view.getTranslateX() - velocity);
+    }
+
+    public void moveRight() {
+        view.setTranslateX(view.getTranslateX() + velocity);
+    }
+
+    public void setVelocity(int velocity) {
+        this.velocity = velocity;
+    }
+
+    public int getVelocity() {
+        return velocity;
+    }
+
+}

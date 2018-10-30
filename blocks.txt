@@ -1,0 +1,31 @@
+
+package sample;
+
+import javafx.scene.Node;
+
+public class Blocks {
+
+    private Node view;
+    private int velocity;
+
+    public Blocks(Node view) {
+        this.view = view;
+    }
+
+    public Node getView() {
+        return view;
+    }
+
+    public void update() {
+        view.setTranslateY(view.getTranslateY() + velocity);
+    }
+
+    public void setVelocity(int velocity) {
+        this.velocity = velocity;
+    }
+
+    public int getVelocity() {
+        return velocity;
+    }
+
+}
