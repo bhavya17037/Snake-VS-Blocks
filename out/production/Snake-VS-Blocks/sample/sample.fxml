@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane alignment="center" hgap="10" prefHeight="650.0" prefWidth="500.0" style="-fx-background-color: #4286f4" vgap="10" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+   <children>
+      <AnchorPane maxHeight="650.0" maxWidth="550.0" minHeight="300.0" minWidth="300.0" prefHeight="650.0" prefWidth="500.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="181.0" layoutY="208.0" prefHeight="65.0" prefWidth="107.0" text="2019">
+               <font>
+                  <Font size="41.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="274.0" fitWidth="363.0" layoutX="106.0" layoutY="-33.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@snake-vs-block_logo.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="play_btn" fitHeight="84.0" fitWidth="100.0" layoutX="192.0" layoutY="272.0" onMouseClicked="#playGame" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@highscore_button.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="openLeaderboad" fitHeight="74.0" fitWidth="84.0" layoutX="202.0" layoutY="528.0" onMouseClicked="#leaderboardScreen" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@b.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="65.0" fitWidth="62.0" layoutX="370.0" layoutY="535.0" onMouseClicked="#closeScreen" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@a.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="74.0" fitWidth="74.0" layoutX="35.0" layoutY="529.0" onMouseClicked="#settingsScreen" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image_settings.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="153.0" layoutY="373.0" onMouseClicked="#playGame" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@Play_Button.png" />
+               </image>
+            </ImageView>
+         </children></AnchorPane>
+   </children>
+</GridPane>

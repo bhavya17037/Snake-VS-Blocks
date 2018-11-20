@@ -1,26 +1,26 @@
 package sample;
 
 import javafx.animation.AnimationTimer;
-import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Duration;
-
+import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Random;
+import javafx.util.Duration;
+import javafx.animation.TranslateTransition;
+
 
 public class MainGame extends Application {
 
@@ -30,14 +30,40 @@ public class MainGame extends Application {
     private static ArrayList<Token> Tokens = new ArrayList<Token>();
     private static ArrayList<Token> Points = new ArrayList<Token>();
     private static ArrayList<Token> Bombs = new ArrayList<Token>();
+    private static ArrayList<Token> Shields = new ArrayList<Token>();
+    private static ArrayList<Token> Magnets = new ArrayList<Token>();
+    Timer time;
+    Timer time1;
     Snake snake;
     private boolean isLeftPressed = false;
     private boolean isRightPressed = false;
+    private boolean shieldActive = false;
+    private boolean magnetActive = false;
 
     public static int randInt(int min, int max) {
         Random rand = new Random();
         int randomNum = rand.nextInt((max - min) + 1) + min;
         return randomNum;
+    }
+
+    class shieldTimer extends TimerTask{
+        @Override
+        public void run() {
+            shieldActive = false;
+            time.cancel();
+        }
+    }
+
+    class magnetTimer extends TimerTask{
+        @Override
+        public void run(){
+            magnetActive = false;
+            for(int p = 0; p < Points.size(); p++){
+                Token curr = Points.get(p);
+                curr.setInfluenced(false);
+            }
+            time1.cancel();
+        }
     }
 
     private Parent createContent(){
@@ -145,6 +171,7 @@ public class MainGame extends Application {
             return;
         }
         Tokens.add(magnet);
+        Magnets.add(magnet);
     }
 
     public void addShields() throws FileNotFoundException{
@@ -160,6 +187,7 @@ public class MainGame extends Application {
             return;
         }
         Tokens.add(shield);
+        Shields.add(shield);
     }
 
     private void onUpdate(){
@@ -171,7 +199,7 @@ public class MainGame extends Application {
             curr.setY(curr.getBlocks().get(0).getView().getTranslateY());
             ArrayList<Block> blocks = curr.getBlocks();
             for(int j = 0; j < blocks.size(); j++){
-                if(head.isColliding(blocks.get(j))){
+                if(head.isColliding(blocks.get(j)) && !shieldActive){
                     double y = blocks.get(j).getView().getTranslateY() - 40;
                     int tolerance = Integer.parseInt(blocks.get(j).getLabel().getText());
                     tolerance--;
@@ -210,16 +238,72 @@ public class MainGame extends Application {
             }
         }
 
-        for(int i = 0; i < Points.size(); i++){
+        for (int i = 0; i < Points.size(); i++) {
             Token curr = Points.get(i);
             head = snake.getHead();
-            if(head.isColliding(curr)){
+            if (head.isColliding(curr)) {
                 snake.addPart(root);
                 root.getChildren().remove(curr.getView());
                 root.getChildren().remove(curr.getImage());
                 Points.remove(i);
                 Tokens.remove(curr);
                 break;
+            }
+        }
+
+
+
+        for(int i = 0; i < Points.size(); i++){
+            Token curr = Points.get(i);
+            head = snake.getHead();
+            double ax = head.getView().getTranslateX();
+            double ay = head.getView().getTranslateY();
+            double bx = curr.getView().getTranslateX();
+            double by = curr.getView().getTranslateY();
+
+            double dist = Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+            if(dist <= 100 && !curr.getInfluenced() && magnetActive){
+                curr.setInfluenced(true);
+                TranslateTransition translateTransition = new TranslateTransition();
+                translateTransition.setDuration(Duration.seconds(0.3));
+                translateTransition.setNode(curr.getView());
+                translateTransition.setFromY(curr.getView().getTranslateY());
+                translateTransition.setToY(head.getView().getTranslateY());
+                translateTransition.setFromX(curr.getView().getTranslateX());
+                translateTransition.setToX(head.getView().getTranslateX());
+                translateTransition.play();
+            }
+        }
+
+
+
+        for(int i = 0; i < Shields.size(); i++){
+            Token curr = Shields.get(i);
+            head = snake.getHead();
+
+            if(head.isColliding(curr)){
+                shieldActive = true;
+                root.getChildren().remove(curr.getView());
+                root.getChildren().remove(curr.getImage());
+                Shields.remove(i);
+                Tokens.remove(curr);
+                time = new Timer();
+                time.schedule(new shieldTimer(), 5000);
+            }
+        }
+
+        for(int i = 0; i < Magnets.size(); i++){
+            Token curr = Magnets.get(i);
+            head = snake.getHead();
+
+            if(head.isColliding(curr)){
+                magnetActive = true;
+                root.getChildren().remove(curr.getView());
+                root.getChildren().remove(curr.getImage());
+                Magnets.remove(i);
+                Tokens.remove(curr);
+                time1 = new Timer();
+                time1.schedule(new magnetTimer(), 10000);
             }
         }
 
@@ -372,5 +456,4 @@ public class MainGame extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="650.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.172-ea" style="-fx-background-color: #4286f4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.settingsController">
+   <children>
+      <Label layoutX="153.0" layoutY="43.0" text="Settings">
+         <font>
+            <Font name="Comic Sans MS" size="48.0" />
+         </font></Label>
+      <Label layoutX="38.0" layoutY="172.0" text="Volume">
+         <font>
+            <Font name="Comic Sans MS" size="34.0" />
+         </font>
+      </Label>
+      <Slider layoutX="276.0" layoutY="189.0" />
+      <ImageView fitHeight="107.0" fitWidth="77.0" layoutX="6.0" layoutY="5.0" onMouseClicked="#goBack" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@backButton.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="mute_btn" fitHeight="98.0" fitWidth="96.0" layoutX="198.0" layoutY="292.0" onMouseClicked="#mute" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@unmute_button.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="mute_label" alignment="CENTER" layoutX="199.0" layoutY="406.0" prefHeight="35.0" prefWidth="96.0" text="Mute">
+         <font>
+            <Font name="Comic Sans MS" size="24.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

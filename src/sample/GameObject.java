@@ -19,6 +19,7 @@ public class GameObject {
     private float x, y;
     private ImageView img;
     private Label tolerance;
+    private boolean influenced = false;
 
     private static int colorIndex = 0;
     private Color[] colorList = {Color.RED, Color.GREEN, Color.ORANGE, Color.YELLOW, Color.VIOLET};
@@ -117,6 +118,12 @@ public class GameObject {
 
     public void setLabelText(String x){
         this.tolerance.setText(x);
+    }
+    public boolean getInfluenced(){
+        return this.influenced;
+    }
+    public void setInfluenced(boolean f){
+        this.influenced = f;
     }
 
 }
