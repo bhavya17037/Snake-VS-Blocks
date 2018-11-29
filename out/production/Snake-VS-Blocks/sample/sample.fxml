@@ -33,7 +33,7 @@
                   <Image url="@snake-vs-block_logo.png" />
                </image>
             </ImageView>
-            <ImageView fx:id="play_btn" fitHeight="84.0" fitWidth="100.0" layoutX="192.0" layoutY="272.0" onMouseClicked="#playGame" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="play_btn" fitHeight="84.0" fitWidth="100.0" layoutX="192.0" layoutY="272.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@highscore_button.png" />
                </image>

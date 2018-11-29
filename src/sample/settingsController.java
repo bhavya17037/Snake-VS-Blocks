@@ -25,9 +25,15 @@ public class settingsController {
         Main.getStage().show();
     }
 
-    public void mute() {
-        mute_btn.setImage(new Image("sample/mute_button.png"));
-        mute_label.setText("Unmute");
+    @FXML
+    public void initialize() {
+        if (Main.isGameMuted == false) {
+            mute_btn.setImage(new Image("sample/unmute_button.png"));
+            mute_label.setText("Mute");
+        } else {
+            mute_btn.setImage(new Image("sample/mute_button.png"));
+            mute_label.setText("Unmute");
+        }
     }
 
     public void unmute() throws IOException {
@@ -35,11 +41,12 @@ public class settingsController {
         if (mute_label.getText().equals("Unmute")) {
             mute_btn.setImage(new Image("sample/unmute_button.png"));
             mute_label.setText("Mute");
+            Main.isGameMuted = false;
         } else {
             mute_btn.setImage(new Image("sample/mute_button.png"));
             mute_label.setText("Unmute");
+            Main.isGameMuted = true;
         }
-        goBack();
     }
 
 }

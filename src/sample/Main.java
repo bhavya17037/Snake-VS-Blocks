@@ -26,14 +26,23 @@ public class Main extends Application {
 
     private static Stage stage;
     private static MainGame game;
+    public static Boolean isGameMuted = false;
+    public static Boolean showResumeScreen = true;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
         stage = primaryStage;
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("SnakeVsBlock");
-        primaryStage.setScene(new Scene(root, 500, 650));
-        primaryStage.show();
+        if (showResumeScreen) {
+            Parent root = FXMLLoader.load(getClass().getResource("resumeScreen.fxml"));
+            primaryStage.setTitle("SnakeVsBlock");
+            primaryStage.setScene(new Scene(root, 500, 650));
+            primaryStage.show();
+        } else {
+            Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+            primaryStage.setTitle("SnakeVsBlock");
+            primaryStage.setScene(new Scene(root, 500, 650));
+            primaryStage.show();
+        }
 
     }
 

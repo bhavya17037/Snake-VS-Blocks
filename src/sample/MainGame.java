@@ -32,6 +32,7 @@ public class MainGame extends Application {
     private static ArrayList<Token> Bombs = new ArrayList<Token>();
     private static ArrayList<Token> Shields = new ArrayList<Token>();
     private static ArrayList<Token> Magnets = new ArrayList<Token>();
+
     Timer time;
     Timer time1;
     Snake snake;

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.172-ea" style="-fx-background-color: #4286f4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.settingsController">
+<AnchorPane prefHeight="650.0" prefWidth="500.0" style="-fx-background-color: #4286f4" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.settingsController">
    <children>
       <Label layoutX="153.0" layoutY="43.0" text="Settings">
          <font>
@@ -24,7 +24,7 @@
             <Image url="@backButton.png" />
          </image>
       </ImageView>
-      <ImageView fx:id="mute_btn" fitHeight="98.0" fitWidth="96.0" layoutX="198.0" layoutY="292.0" onMouseClicked="#mute" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="mute_btn" fitHeight="98.0" fitWidth="96.0" layoutX="198.0" layoutY="292.0" onMouseClicked="#unmute" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@unmute_button.png" />
          </image>
