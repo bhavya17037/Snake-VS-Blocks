@@ -19,6 +19,7 @@ import javafx.scene.layout.BackgroundFill;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.*;
 import java.util.Random;
@@ -39,11 +40,13 @@ public class MainGame extends Application implements Serializable {
     private transient ArrayList<Token> Magnets = new ArrayList<Token>();
     private transient AnimationTimer timer;
 
-    private ArrayList<Integer> listOfChains = new ArrayList<Integer>();
-    private ArrayList<Integer> listOfPoints = new ArrayList<Integer>();
-    private ArrayList<Integer> listOfBombs = new ArrayList<Integer>();
-    private ArrayList<Integer> listOfShields = new ArrayList<Integer>();
-    private ArrayList<Integer> listOfMagnets = new ArrayList<Integer>();
+    private ArrayList<ArrayList<coordinate>> listOfChains = new ArrayList<ArrayList<coordinate>>();
+    private ArrayList<coordinate> listOfPoints = new ArrayList<coordinate>();
+    private ArrayList<coordinate> listOfBombs = new ArrayList<coordinate>();
+    private ArrayList<coordinate> listOfShields = new ArrayList<coordinate>();
+    private ArrayList<coordinate> listOfMagnets = new ArrayList<coordinate>();
+    private double snakeX;
+    private int snakeSize;
 
     transient Timer time;
     transient Timer time1;
@@ -91,6 +94,44 @@ public class MainGame extends Application implements Serializable {
         }
     }
 
+    public void updateLists() {
+
+        listOfChains = new ArrayList<ArrayList<coordinate>>();
+        listOfPoints = new ArrayList<coordinate>();
+        listOfBombs = new ArrayList<coordinate>();
+        listOfShields = new ArrayList<coordinate>();
+        listOfMagnets = new ArrayList<coordinate>();
+
+        snakeSize = snake.getLength();
+        snakeX = snake.getX();
+
+        for (int i = 0; i < Points.size(); i++) {
+            listOfPoints.add(new coordinate((float) Points.get(i).getView().getTranslateX(), (float) Points.get(i).getView().getTranslateY()));
+        }
+
+        for (int i = 0; i < Bombs.size(); i++) {
+            listOfBombs.add(new coordinate((float) Bombs.get(i).getView().getTranslateX(), (float) Bombs.get(i).getView().getTranslateY()));
+        }
+
+        for (int i = 0; i < Shields.size(); i++) {
+            listOfShields.add(new coordinate((float) Shields.get(i).getView().getTranslateX(), (float) Shields.get(i).getView().getTranslateY()));
+        }
+
+        for (int i = 0; i < Magnets.size(); i++) {
+            listOfMagnets.add(new coordinate((float) Magnets.get(i).getView().getTranslateX(), (float) Magnets.get(i).getView().getTranslateY()));
+        }
+
+        for (int i = 0; i < chainsOnScreen.size(); i++) {
+            ArrayList<Block> blocks = chainsOnScreen.get(i).getBlocks();
+            ArrayList<coordinate> coordinates = new ArrayList<coordinate>();
+            for (int j = 0; j < blocks.size(); j++) {
+                coordinates.add(new coordinate(((float) (blocks.get(i).getView()).getTranslateX()), (float) blocks.get(i).getView().getTranslateY()));
+            }
+            listOfChains.add(coordinates);
+        }
+
+    }
+
     public void deleteParticles(){
         root.getChildren().remove(p1.getView());
         root.getChildren().remove(p2.getView());
@@ -135,8 +176,9 @@ public class MainGame extends Application implements Serializable {
             root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
             snake = new Snake(root);
 
-
-
+            for (int i = 1; i < snakeSize; i++) {
+                snake.addPartAtX(root, snakeX);
+            }
 
             root = snake.addLabel(root);
 
@@ -148,7 +190,88 @@ public class MainGame extends Application implements Serializable {
             Shields = new ArrayList<Token>();
             Magnets = new ArrayList<Token>();
 
+
+            for (int i = 0; i < listOfBombs.size(); i++) {
+                Token bomb = null;
+                try {
+                    float x =listOfBombs.get(i).getX();
+                    float y = listOfBombs.get(i).getY();
+                    Token b = new Bomb(x, y, snake);
+                    root.getChildren().add(b.getView());
+                    root.getChildren().add(b.getImage());
+                    bomb = b;
+                }catch(FileNotFoundException e){
+                    e.printStackTrace();
+                }
+                Tokens.add(bomb);
+                Bombs.add(bomb);
+            }
+
+            for (int i = 0; i < listOfPoints.size(); i++) {
+                Token point = null;
+                try {
+                    float x = listOfPoints.get(i).getX();
+                    float y = listOfPoints.get(i).getY();
+                    Token p = new Point(x, y, snake);
+                    root.getChildren().add(p.getView());
+                    root.getChildren().add(p.getImage());
+                    point = p;
+                }catch(FileNotFoundException e){
+                    e.printStackTrace();
+                }
+                Tokens.add(point);
+                Points.add(point);
+            }
+
+            for (int i = 0; i < listOfMagnets.size(); i++) {
+                Token magnet = null;
+                try {
+                    float x = listOfMagnets.get(i).getX();
+                    float y = listOfMagnets.get(i).getY();
+                    Token m = new Magnet(x, y, snake);
+                    root.getChildren().add(m.getView());
+                    root.getChildren().add(m.getImage());
+                    magnet = m;
+                }catch(FileNotFoundException e){
+                    e.printStackTrace();
+                }
+                Tokens.add(magnet);
+                Magnets.add(magnet);
+            }
+
+            for (int i = 0; i < listOfShields.size(); i++) {
+                Token shield = null;
+                try {
+                    float x = listOfShields.get(i).getX();
+                    float y = listOfShields.get(i).getY();
+                    Token b = new Shield(x, y, snake);
+                    root.getChildren().add(b.getView());
+                    root.getChildren().add(b.getImage());
+                    shield = b;
+                }catch(FileNotFoundException e){
+                    e.printStackTrace();
+                }
+                Tokens.add(shield);
+                Shields.add(shield);
+            }
+
+            for (int i = 0; i < listOfChains.size(); i++) {
+                ArrayList<Block> blocks = new ArrayList<Block>();
+
+                ArrayList<coordinate> coordinates = listOfChains.get(i);
+
+                for(int j = 0; j < coordinates.size(); j++){
+                    Block block = new Block(coordinates.get(j).getX(), coordinates.get(j).getY(), snake);
+                    blocks.add(block);
+                    root.getChildren().add(block.getView());
+                    root.getChildren().add(block.getLabel());
+                }
+
+                Chain newchain = new Chain(blocks);
+                chainsOnScreen.add(newchain);
+            }
         }
+
         URL resource = getClass().getResource("gameMainMusic.mp3");
         MediaPlayer mediaPlayer = new MediaPlayer(new Media(resource.toString()));
         mediaPlayer.setCycleCount(mediaPlayer.INDEFINITE);
@@ -158,6 +281,7 @@ public class MainGame extends Application implements Serializable {
             @Override
             public void handle(long now) {
                 try {
+                    updateLists();
                     onUpdate();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -498,6 +622,8 @@ public class MainGame extends Application implements Serializable {
         if (isGameOver) {
             isGameOver = false;
             timer.stop();
+            updateLists();
+            Main.showResumeScreen = false;
             Main.serialize(this, false);
             Parent root = FXMLLoader.load(getClass().getResource("gameOver.fxml"));
             Scene scene = new Scene(root, 500, 650);

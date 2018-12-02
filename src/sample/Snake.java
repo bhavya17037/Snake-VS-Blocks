@@ -41,6 +41,26 @@ public class Snake implements Serializable {
         score.setText(Integer.toString(body.size()));
     }
 
+    public void addPartAtX(Pane root, double x) {
+        if(body.size() == 0){
+            head = new Ball((int) x, 400, this);
+            Node headview = head.getView();
+            head.setView(headview);
+            body.add(head);
+            root.getChildren().add(head.getView());
+        }else{
+            Ball last = body.get(body.size() - 1);
+            Node lastview = last.getView();
+            Ball newpart = new Ball(0,0, this);
+            Node view = newpart.getView();
+            view.setTranslateY(lastview.getTranslateY() + 40);
+            view.setTranslateX((int) x);
+            newpart.setView(view);
+            body.add(newpart);
+            root.getChildren().add(view);
+        }
+    }
+
     public void addPart(Pane root){
         if(body.size() == 0){
             head = new Ball(200, 400, this);

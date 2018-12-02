@@ -86,6 +86,7 @@ public class Main extends Application implements Serializable {
 
     public static void playNewGame() throws Exception {
         game = new MainGame();
+        showResumeScreen = false;
         game.start(stage);
     }
 
