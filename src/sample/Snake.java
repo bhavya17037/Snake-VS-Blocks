@@ -1,17 +1,19 @@
 package sample;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 
-public class Snake {
+public class Snake implements Serializable {
     private static ArrayList<Ball> body;
     private Ball head;
     private float x;
     private float tailYPos;
     private Label score;
+    private int maxScore;
     public Snake(Pane root){
         body = new ArrayList<Ball>();
         this.x = 400;
@@ -33,6 +35,9 @@ public class Snake {
     public void updateLabel(){
         score.setLayoutY(body.get(0).getView().getTranslateY());
         score.setLayoutX(body.get(0).getView().getTranslateX());
+        if (body.size() > maxScore) {
+            maxScore = body.size();
+        }
         score.setText(Integer.toString(body.size()));
     }
 
@@ -58,6 +63,7 @@ public class Snake {
 
     public Pane deletePart(Pane root){
         if(body.size() == 1){
+            MainGame.isGameOver = true;
             System.out.println("Game Over");
             return root;
         }else{

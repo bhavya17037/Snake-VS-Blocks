@@ -3,6 +3,7 @@ package sample;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -16,6 +17,8 @@ import javafx.scene.layout.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 import java.util.Random;
@@ -23,23 +26,31 @@ import javafx.util.Duration;
 import javafx.animation.TranslateTransition;
 
 
-public class MainGame extends Application {
+public class MainGame extends Application implements Serializable {
 
-    public static Pane root;
+    public transient Pane root;
     public int width = 400;
-    private static ArrayList<Chain> chainsOnScreen = new ArrayList<Chain>();
-    private static ArrayList<Token> Tokens = new ArrayList<Token>();
-    private static ArrayList<Token> Points = new ArrayList<Token>();
-    private static ArrayList<Token> Bombs = new ArrayList<Token>();
-    private static ArrayList<Token> Shields = new ArrayList<Token>();
-    private static ArrayList<Token> Magnets = new ArrayList<Token>();
+    public static boolean isGameOver = false;
+    private transient ArrayList<Chain> chainsOnScreen = new ArrayList<Chain>();
+    private transient ArrayList<Token> Tokens = new ArrayList<Token>();
+    private transient ArrayList<Token> Points = new ArrayList<Token>();
+    private transient ArrayList<Token> Bombs = new ArrayList<Token>();
+    private transient ArrayList<Token> Shields = new ArrayList<Token>();
+    private transient ArrayList<Token> Magnets = new ArrayList<Token>();
+    private transient AnimationTimer timer;
 
-    Timer time;
-    Timer time1;
-    Timer time2;
+    private ArrayList<Integer> listOfChains = new ArrayList<Integer>();
+    private ArrayList<Integer> listOfPoints = new ArrayList<Integer>();
+    private ArrayList<Integer> listOfBombs = new ArrayList<Integer>();
+    private ArrayList<Integer> listOfShields = new ArrayList<Integer>();
+    private ArrayList<Integer> listOfMagnets = new ArrayList<Integer>();
+
+    transient Timer time;
+    transient Timer time1;
+    transient Timer time2;
     boolean particlesPresent = false;
-    Snake snake;
-    Particle p1, p2, p3, p4, p5, p6, p7, p8, p9;
+    transient Snake snake;
+    transient Particle p1, p2, p3, p4, p5, p6, p7, p8, p9;
     private boolean isLeftPressed = false;
     private boolean isRightPressed = false;
     private boolean shieldActive = false;
@@ -103,28 +114,54 @@ public class MainGame extends Application {
     }
 
     private Parent createContent(){
-        root = new Pane();
-        root.setPrefSize(width,800);
-        root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
-        snake = new Snake(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        snake.addPart(root);
-        root = snake.addLabel(root);
+        if (Main.showResumeScreen == false) {
+
+            root = new Pane();
+            root.setPrefSize(width,800);
+            root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
+            snake = new Snake(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            snake.addPart(root);
+            root = snake.addLabel(root);
+        } else {
+            root = new Pane();
+            root.setPrefSize(width,800);
+            root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
+            snake = new Snake(root);
+
+
+
+
+            root = snake.addLabel(root);
+
+            Bombs = new ArrayList<Token>();
+
+            chainsOnScreen = new ArrayList<Chain>();
+            Tokens = new ArrayList<Token>();
+            Points = new ArrayList<Token>();
+            Shields = new ArrayList<Token>();
+            Magnets = new ArrayList<Token>();
+
+        }
         URL resource = getClass().getResource("gameMainMusic.mp3");
         MediaPlayer mediaPlayer = new MediaPlayer(new Media(resource.toString()));
         mediaPlayer.setCycleCount(mediaPlayer.INDEFINITE);
         mediaPlayer.play();
 
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                onUpdate();
+                try {
+                    onUpdate();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
         timer.start();
@@ -456,243 +493,253 @@ public class MainGame extends Application {
         Shields.add(shield);
     }
 
-    private void onUpdate(){
+    private void onUpdate() throws IOException {
 
-        Ball head = snake.getHead();
-        snake.updateLabel();
+        if (isGameOver) {
+            isGameOver = false;
+            timer.stop();
+            Main.serialize(this, false);
+            Parent root = FXMLLoader.load(getClass().getResource("gameOver.fxml"));
+            Scene scene = new Scene(root, 500, 650);
+            Main.getStage().setScene(scene);
+            Main.getStage().show();
+        } else {
 
-        if(!particlesPresent){
-            if(p1 != null && p2 != null && p3 != null && p4 != null && p5 != null && p6 != null && p7 != null && p8 != null && p9 != null)
-                deleteParticles();
-        }
+            Main.serialize(this, true);
 
-        for(int i = 0; i < chainsOnScreen.size(); i++){
-            Chain curr = chainsOnScreen.get(i);
-            curr.setY(curr.getBlocks().get(0).getView().getTranslateY());
-            ArrayList<Block> blocks = curr.getBlocks();
-            for(int j = 0; j < blocks.size(); j++){
-                if(head.isColliding(blocks.get(j)) && !shieldActive){
-                    double y = blocks.get(j).getView().getTranslateY() - 40;
-                    int tolerance = Integer.parseInt(blocks.get(j).getLabel().getText());
-                    tolerance--;
-                    blocks.get(j).setLabelText(Integer.toString(tolerance));
-                    if(tolerance == 0){
-                        burst(blocks.get(j), true);
-                        root.getChildren().remove(blocks.get(j).getView());
-                        root.getChildren().remove(blocks.get(j).getLabel());
-                        blocks.remove(j);
-                        curr.setBlocks(blocks);
+            Ball head = snake.getHead();
+            snake.updateLabel();
+
+            if (!particlesPresent) {
+                if (p1 != null && p2 != null && p3 != null && p4 != null && p5 != null && p6 != null && p7 != null && p8 != null && p9 != null)
+                    deleteParticles();
+            }
+
+            for (int i = 0; i < chainsOnScreen.size(); i++) {
+                Chain curr = chainsOnScreen.get(i);
+                curr.setY(curr.getBlocks().get(0).getView().getTranslateY());
+                ArrayList<Block> blocks = curr.getBlocks();
+                for (int j = 0; j < blocks.size(); j++) {
+                    if (head.isColliding(blocks.get(j)) && !shieldActive) {
+                        double y = blocks.get(j).getView().getTranslateY() - 40;
+                        int tolerance = Integer.parseInt(blocks.get(j).getLabel().getText());
+                        tolerance--;
+                        blocks.get(j).setLabelText(Integer.toString(tolerance));
+                        if (tolerance == 0) {
+                            burst(blocks.get(j), true);
+                            root.getChildren().remove(blocks.get(j).getView());
+                            root.getChildren().remove(blocks.get(j).getLabel());
+                            blocks.remove(j);
+                            curr.setBlocks(blocks);
+                        }
+                        root = snake.deletePart(root);
+                        for (int k = 0; k < blocks.size(); k++) {
+                            TranslateTransition translateTransition = new TranslateTransition();
+                            translateTransition.setDuration(Duration.seconds(0.3));
+                            translateTransition.setNode(blocks.get(k).getView());
+                            translateTransition.setFromY(blocks.get(k).getView().getTranslateY());
+                            translateTransition.setToY(blocks.get(k).getView().getTranslateY() - 40);
+                            translateTransition.play();
+                        }
+                        curr.setY(y);
+                        for (int k = 0; k < Tokens.size(); k++) {
+                            TranslateTransition translateTransition = new TranslateTransition();
+                            translateTransition.setDuration(Duration.seconds(0.3));
+                            translateTransition.setNode(Tokens.get(k).getView());
+                            translateTransition.setFromY(Tokens.get(k).getView().getTranslateY());
+                            translateTransition.setToY(Tokens.get(k).getView().getTranslateY() - 40);
+                            translateTransition.play();
+                        }
+
+                        break;
+                            /*root.getChildren().remove(blocks.get(j).getView());
+                            root.getChildren().remove(blocks.get(j).getLabel());
+                            blocks.remove(j);
+                            curr.setBlocks(blocks);*/
                     }
-                    root = snake.deletePart(root);
-                    for(int k = 0; k < blocks.size(); k++){
-                        TranslateTransition translateTransition = new TranslateTransition();
-                        translateTransition.setDuration(Duration.seconds(0.3));
-                        translateTransition.setNode(blocks.get(k).getView());
-                        translateTransition.setFromY(blocks.get(k).getView().getTranslateY());
-                        translateTransition.setToY(blocks.get(k).getView().getTranslateY() - 40);
-                        translateTransition.play();
-                    }
-                    curr.setY(y);
-                    for(int k = 0; k < Tokens.size(); k++){
-                        TranslateTransition translateTransition = new TranslateTransition();
-                        translateTransition.setDuration(Duration.seconds(0.3));
-                        translateTransition.setNode(Tokens.get(k).getView());
-                        translateTransition.setFromY(Tokens.get(k).getView().getTranslateY());
-                        translateTransition.setToY(Tokens.get(k).getView().getTranslateY() - 40);
-                        translateTransition.play();
+                }
+            }
+
+            for (int i = 0; i < Points.size(); i++) {
+                Token curr = Points.get(i);
+                head = snake.getHead();
+                if (head.isColliding(curr)) {
+                    snake.addPart(root);
+                    root.getChildren().remove(curr.getView());
+                    root.getChildren().remove(curr.getImage());
+                    Points.remove(i);
+                    Tokens.remove(curr);
+                    break;
+                }
+            }
+
+
+            for (int i = 0; i < Points.size(); i++) {
+                Token curr = Points.get(i);
+                head = snake.getHead();
+                double ax = head.getView().getTranslateX();
+                double ay = head.getView().getTranslateY();
+                double bx = curr.getView().getTranslateX();
+                double by = curr.getView().getTranslateY();
+
+                double dist = Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+                if (dist <= 100 && !curr.getInfluenced() && magnetActive) {
+                    curr.setInfluenced(true);
+                    TranslateTransition translateTransition = new TranslateTransition();
+                    translateTransition.setDuration(Duration.seconds(0.18));
+                    translateTransition.setNode(curr.getView());
+                    translateTransition.setFromY(curr.getView().getTranslateY());
+                    translateTransition.setToY(head.getView().getTranslateY());
+                    translateTransition.setFromX(curr.getView().getTranslateX());
+                    translateTransition.setToX(head.getView().getTranslateX());
+                    translateTransition.play();
+                }
+            }
+
+
+            for (int i = 0; i < Shields.size(); i++) {
+                Token curr = Shields.get(i);
+                head = snake.getHead();
+
+                if (head.isColliding(curr)) {
+                    shieldActive = true;
+                    root.getChildren().remove(curr.getView());
+                    root.getChildren().remove(curr.getImage());
+                    Shields.remove(i);
+                    Tokens.remove(curr);
+                    time = new Timer();
+                    time.schedule(new shieldTimer(), 5000);
+                }
+            }
+
+            for (int i = 0; i < Magnets.size(); i++) {
+                Token curr = Magnets.get(i);
+                head = snake.getHead();
+
+                if (head.isColliding(curr)) {
+                    magnetActive = true;
+                    root.getChildren().remove(curr.getView());
+                    root.getChildren().remove(curr.getImage());
+                    Magnets.remove(i);
+                    Tokens.remove(curr);
+                    time1 = new Timer();
+                    time1.schedule(new magnetTimer(), 10000);
+                }
+            }
+
+            for (int i = 0; i < Bombs.size(); i++) {
+                Token curr = Bombs.get(i);
+                head = snake.getHead();
+                if (head.isColliding(curr)) {
+                    root.getChildren().remove(curr.getView());
+                    root.getChildren().remove(curr.getImage());
+                    Bombs.remove(i);
+                    Tokens.remove(curr);
+                    System.out.println(chainsOnScreen.size());
+                    while (chainsOnScreen.size() != 0) {
+                        ArrayList<Block> blocks = chainsOnScreen.get(0).getBlocks();
+                        Chain currentChain = chainsOnScreen.get(0);
+                        for (int k = 0; k < blocks.size(); k++) {
+                            root.getChildren().remove(blocks.get(k).getView());
+                            root.getChildren().remove(blocks.get(k).getLabel());
+                        }
+
+                        while (blocks.size() != 0) {
+                            blocks.remove(0);
+                            currentChain.setBlocks(blocks);
+                        }
+                        chainsOnScreen.remove(0);
                     }
 
                     break;
-                    /*root.getChildren().remove(blocks.get(j).getView());
-                    root.getChildren().remove(blocks.get(j).getLabel());
-                    blocks.remove(j);
-                    curr.setBlocks(blocks);*/
                 }
             }
-        }
 
-        for (int i = 0; i < Points.size(); i++) {
-            Token curr = Points.get(i);
-            head = snake.getHead();
-            if (head.isColliding(curr)) {
-                snake.addPart(root);
-                root.getChildren().remove(curr.getView());
-                root.getChildren().remove(curr.getImage());
-                Points.remove(i);
-                Tokens.remove(curr);
-                break;
-            }
-        }
-
-
-
-        for(int i = 0; i < Points.size(); i++){
-            Token curr = Points.get(i);
-            head = snake.getHead();
-            double ax = head.getView().getTranslateX();
-            double ay = head.getView().getTranslateY();
-            double bx = curr.getView().getTranslateX();
-            double by = curr.getView().getTranslateY();
-
-            double dist = Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
-            if(dist <= 100 && !curr.getInfluenced() && magnetActive){
-                curr.setInfluenced(true);
-                TranslateTransition translateTransition = new TranslateTransition();
-                translateTransition.setDuration(Duration.seconds(0.18));
-                translateTransition.setNode(curr.getView());
-                translateTransition.setFromY(curr.getView().getTranslateY());
-                translateTransition.setToY(head.getView().getTranslateY());
-                translateTransition.setFromX(curr.getView().getTranslateX());
-                translateTransition.setToX(head.getView().getTranslateX());
-                translateTransition.play();
-            }
-        }
-
-
-
-        for(int i = 0; i < Shields.size(); i++){
-            Token curr = Shields.get(i);
-            head = snake.getHead();
-
-            if(head.isColliding(curr)){
-                shieldActive = true;
-                root.getChildren().remove(curr.getView());
-                root.getChildren().remove(curr.getImage());
-                Shields.remove(i);
-                Tokens.remove(curr);
-                time = new Timer();
-                time.schedule(new shieldTimer(), 5000);
-            }
-        }
-
-        for(int i = 0; i < Magnets.size(); i++){
-            Token curr = Magnets.get(i);
-            head = snake.getHead();
-
-            if(head.isColliding(curr)){
-                magnetActive = true;
-                root.getChildren().remove(curr.getView());
-                root.getChildren().remove(curr.getImage());
-                Magnets.remove(i);
-                Tokens.remove(curr);
-                time1 = new Timer();
-                time1.schedule(new magnetTimer(), 10000);
-            }
-        }
-
-        for(int i = 0; i < Bombs.size(); i++){
-            Token curr = Bombs.get(i);
-            head = snake.getHead();
-            if(head.isColliding(curr)){
-                root.getChildren().remove(curr.getView());
-                root.getChildren().remove(curr.getImage());
-                Bombs.remove(i);
-                Tokens.remove(curr);
-                System.out.println(chainsOnScreen.size());
-                while(chainsOnScreen.size() != 0){
-                    ArrayList<Block> blocks = chainsOnScreen.get(0).getBlocks();
-                    Chain currentChain = chainsOnScreen.get(0);
-                    for(int k = 0; k < blocks.size(); k++){
-                        root.getChildren().remove(blocks.get(k).getView());
-                        root.getChildren().remove(blocks.get(k).getLabel());
+            int i = 0;
+            while (i < chainsOnScreen.size()) {
+                Chain curr = chainsOnScreen.get(i);
+                ArrayList<Block> blocks = curr.getBlocks();
+                for (int j = 0; j < blocks.size(); j++) {
+                    blocks.get(j).update();
+                }
+                Block first = curr.getBlocks().get(0);
+                if (first.getView().getTranslateY() > 800) {
+                    for (int j = 0; j < chainsOnScreen.get(i).getBlocks().size(); j++) {
+                        chainsOnScreen.get(i).getBlocks().get(j).setImage(null);
+                        root.getChildren().remove(chainsOnScreen.get(i).getBlocks().get(j).getLabel());
                     }
-
-                    while(blocks.size() != 0){
-                        blocks.remove(0);
-                        currentChain.setBlocks(blocks);
-                    }
-                    chainsOnScreen.remove(0);
+                    root.getChildren().remove(chainsOnScreen.get(i));
+                    chainsOnScreen.remove(i);
+                } else {
+                    i++;
                 }
-
-                break;
             }
-        }
+            i = 0;
 
-        int i = 0;
-        while(i < chainsOnScreen.size()){
-            Chain curr = chainsOnScreen.get(i);
-            ArrayList<Block> blocks = curr.getBlocks();
-            for(int j = 0; j < blocks.size(); j++){
-                blocks.get(j).update();
-            }
-            Block first = curr.getBlocks().get(0);
-            if(first.getView().getTranslateY() > 800){
-                for(int j = 0; j < chainsOnScreen.get(i).getBlocks().size(); j++){
-                    chainsOnScreen.get(i).getBlocks().get(j).setImage(null);
-                    root.getChildren().remove(chainsOnScreen.get(i).getBlocks().get(j).getLabel());
+            while (i < Tokens.size()) {
+                Token curr = Tokens.get(i);
+                curr.update();
+
+                if (curr.getView().getTranslateY() > 800) {
+                    root.getChildren().remove(curr);
+                    root.getChildren().remove(curr.getImage());
+                    Tokens.remove(curr);
                 }
-                root.getChildren().remove(chainsOnScreen.get(i));
-                chainsOnScreen.remove(i);
-            }else{
                 i++;
             }
-        }
-        i = 0;
 
-        while(i < Tokens.size()){
-            Token curr = Tokens.get(i);
-            curr.update();
-
-            if(curr.getView().getTranslateY() > 800){
-                root.getChildren().remove(curr);
-                root.getChildren().remove(curr.getImage());
-                Tokens.remove(curr);
+            ArrayList<Ball> body = snake.getBody();
+            for (int j = 0; j < body.size(); j++) {
+                body.get(j).update();
             }
-            i++;
-        }
 
-        ArrayList<Ball> body = snake.getBody();
-        for(int j = 0; j < body.size(); j++){
-            body.get(j).update();
-        }
-
-        if(chainsOnScreen.size() > 0) {
-            if (chainsOnScreen.get(chainsOnScreen.size() - 1).getBlocks().get(0).getView().getTranslateY() > 700) {
+            if (chainsOnScreen.size() > 0) {
+                if (chainsOnScreen.get(chainsOnScreen.size() - 1).getBlocks().get(0).getView().getTranslateY() > 700) {
+                    addChain();
+                }
+            } else {
                 addChain();
             }
-        }else{
-            addChain();
-        }
 
-        if(Math.random() < 0.005){
-            try {
-                addPoints();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
+            if (Math.random() < 0.005) {
+                try {
+                    addPoints();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        if(Math.random() < 0.001){
-            try {
-                addBombs();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
+            if (Math.random() < 0.001) {
+                try {
+                    addBombs();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        if(Math.random() < 0.001){
-            try {
-                addMagnets();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
+            if (Math.random() < 0.001) {
+                try {
+                    addMagnets();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        if(Math.random() < 0.001){
-            try {
-                addShields();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
+            if (Math.random() < 0.001) {
+                try {
+                    addShields();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        if(isLeftPressed){
-            snake.setX(snake.getX() - 10, isLeftPressed, isRightPressed);
-        }
-        else if(isRightPressed){
-            snake.setX(snake.getX() + 10, isLeftPressed, isRightPressed);
-        }else{
-            snake.setX(snake.getX(), false, false);
+            if (isLeftPressed) {
+                snake.setX(snake.getX() - 10, isLeftPressed, isRightPressed);
+            } else if (isRightPressed) {
+                snake.setX(snake.getX() + 10, isLeftPressed, isRightPressed);
+            } else {
+                snake.setX(snake.getX(), false, false);
+            }
         }
     }
 

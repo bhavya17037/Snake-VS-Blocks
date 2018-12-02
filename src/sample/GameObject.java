@@ -9,10 +9,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameObject {
+public class GameObject implements Serializable {
     private Node view;
     private Point2D velocity = new Point2D(0, 0);
     private boolean alive = true;

@@ -15,19 +15,20 @@ import javafx.stage.Stage;
 import javafx.scene.layout.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import java.io.FileNotFoundException;
+
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.Random;
 import javafx.util.Duration;
 import javafx.animation.TranslateTransition;
 
-public class Main extends Application {
+public class Main extends Application implements Serializable {
 
     private static Stage stage;
     private static MainGame game;
     public static Boolean isGameMuted = false;
-    public static Boolean showResumeScreen = true;
+    public static Boolean showResumeScreen = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -46,8 +47,53 @@ public class Main extends Application {
 
     }
 
-    public static void playGame() throws Exception {
+    public static void serialize(MainGame m, Boolean show) throws IOException {
+        ObjectOutputStream out = null;
+        ObjectOutputStream out1 = null;
+        try {
+            out = new ObjectOutputStream(new FileOutputStream("gameState.txt"));
+            out1 = new ObjectOutputStream(new FileOutputStream("resumeState.txt"));
+            out1.writeObject(show);
+            out.writeObject(m);
+        } finally {
+            out.close();
+        }
+    }
+
+    public static MainGame deserialize() {
+        ObjectInputStream in = null;
+
+        try {
+            in = new ObjectInputStream(new FileInputStream("gameState.txt"));
+            return (MainGame) in.readObject();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Boolean resumeScreenStatus() {
+        ObjectInputStream in = null;
+
+        try {
+            in = new ObjectInputStream(new FileInputStream("resumeState.txt"));
+            Boolean x = (Boolean) in.readObject();
+            System.out.println(x);
+            return x;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void playNewGame() throws Exception {
         game = new MainGame();
+        game.start(stage);
+    }
+
+    public static void playGame() throws Exception {
+        game = Main.deserialize();
+        if (game == null) {
+            game = new MainGame();
+        }
         game.start(stage);
     }
 
@@ -57,6 +103,8 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
+        showResumeScreen = Main.resumeScreenStatus();
+        System.out.println(showResumeScreen);
         launch(args);
     }
 }

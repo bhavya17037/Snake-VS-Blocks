@@ -38,7 +38,7 @@ public class Controller {
     private ListView<String> listOfScores;
 
     public void playGame() throws Exception {
-        Main.playGame();
+        Main.playNewGame();
     }
 
     @FXML

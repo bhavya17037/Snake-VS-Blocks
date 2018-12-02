@@ -1,9 +1,10 @@
 package sample;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class Chain {
+public class Chain implements Serializable {
     private ArrayList<Block> blocks;
     public Chain(ArrayList<Block> blocks){
         this.blocks = blocks;

@@ -6,8 +6,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 
-public class Point extends Token{
+public class Point extends Token implements Serializable {
     private Image img;
 
     public Point(float x, float y, Snake snake) throws FileNotFoundException {
