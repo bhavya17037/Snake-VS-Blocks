@@ -1,3 +1,9 @@
+/**
+ * This game contains important methods for manipulation, update and collision of game objects
+ * @author Bhavya Srivastava,Raghav Gupta
+ * @version 1.0
+ */
+
 package sample;
 import javafx.scene.*;
 
@@ -31,6 +37,14 @@ public class GameObject implements Serializable {
         return colorList[colorIndex];
     }
 
+    /**
+     * This initializes various properties and attributes of a game object
+     * @param view Node
+     * @param x float
+     * @param y float
+     * @param img ImageView
+     * @param snake Snake
+     */
     public GameObject(Node view, float x, float y, ImageView img, Snake snake){
          this.view = view;
 
@@ -69,30 +83,58 @@ public class GameObject implements Serializable {
          }
     }
 
+    /**
+     * This is getter for alive Boolean variable
+     * @return Boolean value
+     */
     public boolean isAlive(){
         return this.alive;
     }
 
+    /**
+     * This is getter for Velocity of game object
+     * @return A point2D object
+     */
     public Point2D getVelocity(){
         return velocity;
     }
 
+    /**
+     * This is setter for Velocity of game object
+     * @param velocity Point2D
+     */
     public void setVelocity(Point2D velocity){
         this.velocity = velocity;
     }
 
+    /**
+     * This is getter for view attribute of our game object
+     * @return An object of Node type
+     */
     public Node getView(){
         return view;
     }
 
+    /**
+     * This is setter for view attribute of game object
+     * @param view Node
+     */
     public void setView(Node view){
         this.view = view;
     }
 
+    /**
+     * This checks for collision between game objects
+     * @param other which has GameObject type
+     * @return It returns a Boolean value
+     */
     public boolean isColliding(GameObject other){
         return getView().getBoundsInParent().intersects(other.getView().getBoundsInParent());
     }
 
+    /**
+     * This updates state of object
+     */
     public void update(){
         view.setTranslateY(view.getTranslateY() + velocity.getY());
         if(this.img != null) {
@@ -106,9 +148,18 @@ public class GameObject implements Serializable {
         }
     }
 
+    /**
+     * This is setter for img attribute of game object
+     * @param img ImageView type
+     */
     public void setImage(ImageView img){
         this.img = null;
     }
+
+    /**
+     * This is getter for img attribute of game object
+     * @return ImageView object
+     */
     public ImageView getImage(){
         return this.img;
     }
@@ -117,12 +168,26 @@ public class GameObject implements Serializable {
         return this.tolerance;
     }
 
+    /**
+     * This is setter for tolerance attribute of game object
+     * @param x String
+     */
     public void setLabelText(String x){
         this.tolerance.setText(x);
     }
+
+    /**
+     * This is getter for influenced attribute of game object
+     * @return Boolean value
+     */
     public boolean getInfluenced(){
         return this.influenced;
     }
+
+    /**
+     * This is setter for influenced attribute of game object
+     * @param f Boolean type
+     */
     public void setInfluenced(boolean f){
         this.influenced = f;
     }

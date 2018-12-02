@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -33,12 +34,18 @@ public class Controller {
 
     @FXML
     private ImageView openLeaderboad;*/
+   @FXML
+   private Label hghscr;
 
     @FXML
     private ListView<String> listOfScores;
 
     public void playGame() throws Exception {
         Main.playNewGame();
+    }
+
+    public void initialize() {
+        hghscr.setText(Integer.toString(MainGame.highscore));
     }
 
     @FXML

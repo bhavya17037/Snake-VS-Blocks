@@ -11,7 +11,12 @@ import java.io.IOException;
 public class gameOverController {
 
     @FXML
-    private Label score;
+    public Label score;
+
+    public void initialize() {
+        score.setText(Integer.toString(MainGame.score));
+        MainGame.score = 0;
+    }
 
     public void mainMenu() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
@@ -27,6 +32,7 @@ public class gameOverController {
     public void exit() {
         Main.getStage().close();
     }
+
 
 
 }

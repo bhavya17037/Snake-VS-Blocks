@@ -1,14 +1,25 @@
+/**
+ * This class contains the game loop and some helper functions
+ * @author Bhavya Srivastava,Raghav Gupta
+ * @version 1.0
+ */
+
 package sample;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -16,6 +27,8 @@ import javafx.stage.Stage;
 import javafx.scene.layout.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -27,10 +40,11 @@ import javafx.util.Duration;
 import javafx.animation.TranslateTransition;
 
 
+
 public class MainGame extends Application implements Serializable {
 
     public transient Pane root;
-    public int width = 400;
+    public int width = 500;
     public static boolean isGameOver = false;
     private transient ArrayList<Chain> chainsOnScreen = new ArrayList<Chain>();
     private transient ArrayList<Token> Tokens = new ArrayList<Token>();
@@ -39,6 +53,7 @@ public class MainGame extends Application implements Serializable {
     private transient ArrayList<Token> Shields = new ArrayList<Token>();
     private transient ArrayList<Token> Magnets = new ArrayList<Token>();
     private transient AnimationTimer timer;
+    private transient Label l;
 
     private ArrayList<ArrayList<coordinate>> listOfChains = new ArrayList<ArrayList<coordinate>>();
     private ArrayList<coordinate> listOfPoints = new ArrayList<coordinate>();
@@ -47,6 +62,11 @@ public class MainGame extends Application implements Serializable {
     private ArrayList<coordinate> listOfMagnets = new ArrayList<coordinate>();
     private double snakeX;
     private int snakeSize;
+    public static int score;
+    public static int highscore;
+    public int highScore;
+    public int[] topScores = new int[10];
+    public static int[] recentScores = new int[10];
 
     transient Timer time;
     transient Timer time1;
@@ -59,12 +79,24 @@ public class MainGame extends Application implements Serializable {
     private boolean shieldActive = false;
     private boolean magnetActive = false;
 
+
+    /**
+     * Generates random integer in a given range
+     * @param min An Integer
+     * @param max An Integer
+     * @return An Integer
+     */
     public static int randInt(int min, int max) {
         Random rand = new Random();
         int randomNum = rand.nextInt((max - min) + 1) + min;
         return randomNum;
     }
 
+    /**
+     * This class contains the run method to start the shield timer thread
+     * @author Bhavya Srivastava,Raghav Gupta
+     * @version 1.0
+     */
     class shieldTimer extends TimerTask{
         @Override
         public void run() {
@@ -73,6 +105,11 @@ public class MainGame extends Application implements Serializable {
         }
     }
 
+    /**
+     * This class contains the run method to start magnet timer thread
+     * @author Bhavya Srivastava,Raghav Gupta
+     * @version 1.0
+     */
     class magnetTimer extends TimerTask{
         @Override
         public void run(){
@@ -85,6 +122,11 @@ public class MainGame extends Application implements Serializable {
         }
     }
 
+    /**
+     * This class contains run method for particle timer thread
+     * @author Bhavya Srivastava,Raghav Gupta
+     * @version 1.0
+     */
     class particleTimer extends TimerTask{
         @Override
         public void run(){
@@ -94,6 +136,9 @@ public class MainGame extends Application implements Serializable {
         }
     }
 
+    /**
+     * For saving the properties of the gameplay objects
+     */
     public void updateLists() {
 
         listOfChains = new ArrayList<ArrayList<coordinate>>();
@@ -104,6 +149,13 @@ public class MainGame extends Application implements Serializable {
 
         snakeSize = snake.getLength();
         snakeX = snake.getX();
+        score = snake.getMaxScore();
+
+        if (score > Main.high) {
+            highscore = score;
+            highScore = score;
+            Main.high = score;
+        }
 
         for (int i = 0; i < Points.size(); i++) {
             listOfPoints.add(new coordinate((float) Points.get(i).getView().getTranslateX(), (float) Points.get(i).getView().getTranslateY()));
@@ -132,6 +184,10 @@ public class MainGame extends Application implements Serializable {
 
     }
 
+
+    /**
+     * Deletes particles belonging to the particle system generated during specific collisions
+     */
     public void deleteParticles(){
         root.getChildren().remove(p1.getView());
         root.getChildren().remove(p2.getView());
@@ -154,11 +210,11 @@ public class MainGame extends Application implements Serializable {
         root.getChildren().remove(p9.getImage());
     }
 
-    private Parent createContent(){
+    private Parent createContent() throws FileNotFoundException {
         if (Main.showResumeScreen == false) {
 
             root = new Pane();
-            root.setPrefSize(width,800);
+            root.setPrefSize(485,800);
             root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
             snake = new Snake(root);
             snake.addPart(root);
@@ -170,9 +226,12 @@ public class MainGame extends Application implements Serializable {
             snake.addPart(root);
             snake.addPart(root);
             root = snake.addLabel(root);
+            l = new Label(Integer.toString(snake.getMaxScore()));
+            l.setTranslateX(250);
+            root.getChildren().add(l);
         } else {
             root = new Pane();
-            root.setPrefSize(width,800);
+            root.setPrefSize(485,800);
             root.setBackground(new Background((new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY))));
             snake = new Snake(root);
 
@@ -181,6 +240,10 @@ public class MainGame extends Application implements Serializable {
             }
 
             root = snake.addLabel(root);
+
+            l = new Label(Integer.toString(score));
+            l.setTranslateX(250);
+            root.getChildren().add(l);
 
             Bombs = new ArrayList<Token>();
 
@@ -272,6 +335,54 @@ public class MainGame extends Application implements Serializable {
             }
         }
 
+        ImageView im1 = new javafx.scene.image.ImageView(new Image(new FileInputStream("src/sample/backButton.png")));
+        im1.setFitHeight(50);
+        im1.setFitWidth(50);
+
+        im1.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+                timer.stop();
+                Parent root = null;
+                try {
+                    root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Scene scene = new Scene(root, 500, 650);
+                Main.getStage().setScene(scene);
+                Main.getStage().show();
+            }
+        });
+
+        ImageView im2 = new javafx.scene.image.ImageView(new Image(new FileInputStream("src/sample/pauseBtn.jpg")));
+        im2.setFitWidth(50);
+        im2.setFitHeight(50);
+
+        im2.setTranslateX(450);
+
+        im2.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+                timer.stop();
+                try {
+                    Main.serialize(null, false);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Main.playNewGame();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        root.getChildren().add(im1);
+        root.getChildren().add(im2);
+
         URL resource = getClass().getResource("gameMainMusic.mp3");
         MediaPlayer mediaPlayer = new MediaPlayer(new Media(resource.toString()));
         mediaPlayer.setCycleCount(mediaPlayer.INDEFINITE);
@@ -293,6 +404,11 @@ public class MainGame extends Application implements Serializable {
         return root;
     }
 
+    /**
+     * Handles physics for the bursting of a block
+     * @param obj A GameObject variable
+     * @param isBlock Boolean variable
+     */
     public void burst(GameObject obj, boolean isBlock){
         double sx = 0;
         double sy = 0;
@@ -523,6 +639,9 @@ public class MainGame extends Application implements Serializable {
 
     }
 
+    /**
+     * Adds a Chain of blocks to the screen
+     */
     public void addChain(){
         ArrayList<Block> blocks = new ArrayList<Block>();
         /*int num = (int)(Math.random() * 5 + 1);
@@ -553,6 +672,10 @@ public class MainGame extends Application implements Serializable {
         chainsOnScreen.add(newchain);
     }
 
+    /**
+     * Adds an object on the screen which increases length of the snake
+     * @throws FileNotFoundException
+     */
     public void addPoints() throws FileNotFoundException {
         Token point = null;
         try {
@@ -569,6 +692,10 @@ public class MainGame extends Application implements Serializable {
         Points.add(point);
     }
 
+    /**
+     * Adds bomb object to screen
+     * @throws FileNotFoundException
+     */
     public void addBombs() throws FileNotFoundException{
         Token bomb = null;
         try {
@@ -585,6 +712,10 @@ public class MainGame extends Application implements Serializable {
         Bombs.add(bomb);
     }
 
+    /**
+     * Adds a magnet to the screen
+     * @throws FileNotFoundException
+     */
     public void addMagnets() throws FileNotFoundException{
         Token magnet = null;
         try {
@@ -601,6 +732,10 @@ public class MainGame extends Application implements Serializable {
         Magnets.add(magnet);
     }
 
+    /**
+     * Adds shield to screen
+     * @throws FileNotFoundException
+     */
     public void addShields() throws FileNotFoundException{
         Token shield = null;
         try {
@@ -617,9 +752,19 @@ public class MainGame extends Application implements Serializable {
         Shields.add(shield);
     }
 
+
     private void onUpdate() throws IOException {
 
         if (isGameOver) {
+
+            for (int i = 9; i > 0; i--) {
+                recentScores[i] = recentScores[i-1];
+                topScores[i] = topScores[i-1];
+            }
+
+            recentScores[0] = score;
+            topScores[0] = score;
+
             isGameOver = false;
             timer.stop();
             updateLists();
@@ -635,6 +780,13 @@ public class MainGame extends Application implements Serializable {
 
             Ball head = snake.getHead();
             snake.updateLabel();
+            score = snake.getMaxScore();
+            highscore = Main.high;
+            highScore = Main.high;
+            for (int i = 0; i < 10; i++) {
+                recentScores[i] = topScores[i];
+            }
+            l.setText(Integer.toString(snake.getMaxScore()));
 
             if (!particlesPresent) {
                 if (p1 != null && p2 != null && p3 != null && p4 != null && p5 != null && p6 != null && p7 != null && p8 != null && p9 != null)
@@ -869,10 +1021,18 @@ public class MainGame extends Application implements Serializable {
         }
     }
 
+    /**
+     * Getter method for getting arrayList of chains
+     * @return ArrayList of Chain type
+     */
     public ArrayList<Chain> getChains(){
         return chainsOnScreen;
     }
 
+    /**
+     * Setter method for updating current chain arrayList
+     * @param chain An ArrayList of Chain type
+     */
     public void setChainsOnScreen(ArrayList<Chain> chain){
         chainsOnScreen = chain;
     }

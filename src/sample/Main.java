@@ -1,3 +1,10 @@
+
+/**
+ * Main.java - It is the class which contains methods for setting up the game
+ * @author Bhavya Srivastava,Raghav Gupta
+ * @version 1.0
+ */
+
 package sample;
 
 import javafx.animation.AnimationTimer;
@@ -23,13 +30,19 @@ import java.util.Random;
 import javafx.util.Duration;
 import javafx.animation.TranslateTransition;
 
+
 public class Main extends Application implements Serializable {
 
     private static Stage stage;
     private static MainGame game;
     public static Boolean isGameMuted = false;
     public static Boolean showResumeScreen = false;
+    public static int high;
 
+    /**
+     * Sets up stage
+     * @param primaryStage A variable of type Stage
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         stage = primaryStage;
@@ -39,6 +52,13 @@ public class Main extends Application implements Serializable {
             primaryStage.setScene(new Scene(root, 500, 650));
             primaryStage.show();
         } else {
+            game = Main.deserialize();
+            if (game != null) {
+                MainGame.highscore = game.highScore;
+                for (int i = 0; i < 10; i++) {
+                    MainGame.recentScores[i] = game.topScores[i];
+                }
+            }
             Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
             primaryStage.setTitle("SnakeVsBlock");
             primaryStage.setScene(new Scene(root, 500, 650));
@@ -47,6 +67,11 @@ public class Main extends Application implements Serializable {
 
     }
 
+    /**
+     * Saves game state
+     * @param m of type MainGame
+     * @param show of type Boolean
+     */
     public static void serialize(MainGame m, Boolean show) throws IOException {
         ObjectOutputStream out = null;
         ObjectOutputStream out1 = null;
@@ -60,6 +85,10 @@ public class Main extends Application implements Serializable {
         }
     }
 
+    /**
+     * Loads latest game state
+     * @return A variable of type MainGame
+     */
     public static MainGame deserialize() {
         ObjectInputStream in = null;
 
@@ -71,6 +100,10 @@ public class Main extends Application implements Serializable {
         }
     }
 
+    /**
+     * Loads latest game state if player resumes game
+     * @return A Boolean value
+     */
     public static Boolean resumeScreenStatus() {
         ObjectInputStream in = null;
 
@@ -84,12 +117,20 @@ public class Main extends Application implements Serializable {
         }
     }
 
+    /**
+     * starts a new game
+     * @throws Exception
+     */
     public static void playNewGame() throws Exception {
         game = new MainGame();
         showResumeScreen = false;
         game.start(stage);
     }
 
+    /**
+     * starts a game after deserialize
+     * @throws Exception
+     */
     public static void playGame() throws Exception {
         game = Main.deserialize();
         if (game == null) {
@@ -98,6 +139,10 @@ public class Main extends Application implements Serializable {
         game.start(stage);
     }
 
+    /**
+     * getter method for retrieving stage variable
+     * @return Current instance of type Stage
+     */
     public static Stage getStage() {
         return stage;
     }

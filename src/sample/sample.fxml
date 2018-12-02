@@ -23,7 +23,7 @@
    <children>
       <AnchorPane maxHeight="650.0" maxWidth="550.0" minHeight="300.0" minWidth="300.0" prefHeight="650.0" prefWidth="500.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="181.0" layoutY="208.0" prefHeight="65.0" prefWidth="107.0" text="2019">
+            <Label fx:id="hghscr" alignment="CENTER" contentDisplay="CENTER" layoutX="181.0" layoutY="208.0" prefHeight="65.0" prefWidth="107.0" text="2019">
                <font>
                   <Font size="41.0" />
                </font>
